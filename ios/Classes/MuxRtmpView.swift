@@ -61,7 +61,17 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
       }
       result(nil)
     case "startStream":
-      startStream()
+      var width = 480
+      var height = 640
+        if let args = call.arguments as? [String: Any] {
+            if args["width"] is Int {
+                width = args["width"] as! Int
+            }
+            if args["height"] is Int {
+                height = args["height"] as! Int
+            }
+        }
+        startStream(width: width, height: height)
       result(true)
     case "endStream":
       endStream()
@@ -109,7 +119,7 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
       log("initStream error: no broadcast url")
       return
     }
-    Logboard.with(HaishinKitIdentifier).level = .trace
+//    Logboard.with(HaishinKitIdentifier).level = .trace
     rtmpStream = RTMPStream(connection: rtmpConnection)
 
     rtmpConnection.addEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
@@ -120,6 +130,8 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
     rtmpStream.captureSettings = [
       .fps: 30, // FPS
       .sessionPreset: AVCaptureSession.Preset.medium, // input video width/height
+      .continuousExposure: true,
+      .continuousAutofocus: true,
       // .isVideoMirrored: false,
       // .continuousAutofocus: false, // use camera autofocus mode
       // .continuousExposure: false, //  use camera exposure mode
@@ -129,14 +141,8 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
       .muted: false, // mute audio
       .bitrate: 32 * 1000,
     ]
-    rtmpStream.videoSettings = [
-      .width: 640, // video output width
-      .height: 360, // video output height
-      .bitrate: 160 * 1000, // video output bitrate
-      .profileLevel: kVTProfileLevel_H264_Baseline_3_1, // H264 Profile require "import VideoToolbox"
-      .maxKeyFrameIntervalDuration: 2, // key frame / sec
-    ]
-    // "0" means the same of input
+    
+      // "0" means the same of input
     rtmpStream.recorderSettings = [
       AVMediaType.audio: [
         AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -175,9 +181,16 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
     rtmpConnection.connect(bits.joined(separator: "/"))
   }
 
-  func startStream() {
+    func startStream(width: Int, height: Int) {
     let uri = URL(string: broadcastUrl!)
     log("Starting stream")
+  rtmpStream.videoSettings = [
+    .width: width, // video output width
+    .height: height, // video output height
+    .bitrate: 1200 * 1000, // video output bitrate
+    .profileLevel: kVTProfileLevel_H264_Baseline_AutoLevel, // H264 Profile require "import VideoToolbox"
+    .maxKeyFrameIntervalDuration: 2, // key frame / sec
+  ]
     rtmpStream.publish(uri?.pathComponents.last)
   }
 

@@ -40,7 +40,7 @@ class MuxRtmpController {
         onStatusChange?.call(call.arguments as String);
         return Future<dynamic>.value(true);
       case 'rtmpError':
-        onStatusChange?.call(call.arguments as String);
+        onError?.call(call.arguments as String);
         _isStreaming = false;
         return Future<dynamic>.value(true);
       default:
@@ -48,8 +48,8 @@ class MuxRtmpController {
     }
   }
 
-  Future<void> startStream() async {
-    _isStreaming = await _channel?.invokeMethod('startStream');
+  Future<void> startStream({double width = 480, double height = 640}) async {
+    _isStreaming = await _channel?.invokeMethod('startStream', {'width': width.round(), 'height': height.round()});
   }
 
   Future<void> endStream() async {
