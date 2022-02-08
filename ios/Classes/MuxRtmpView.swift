@@ -63,15 +63,15 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
     case "startStream":
       var width = 480
       var height = 640
-        if let args = call.arguments as? [String: Any] {
-            if args["width"] is Int {
-                width = args["width"] as! Int
-            }
-            if args["height"] is Int {
-                height = args["height"] as! Int
-            }
+      if let args = call.arguments as? [String: Any] {
+        if args["width"] is Int {
+          width = args["width"] as! Int
         }
-        startStream(width: width, height: height)
+        if args["height"] is Int {
+          height = args["height"] as! Int
+        }
+      }
+      startStream(width: width, height: height)
       result(true)
     case "endStream":
       endStream()
@@ -141,8 +141,8 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
       .muted: false, // mute audio
       .bitrate: 32 * 1000,
     ]
-    
-      // "0" means the same of input
+
+    // "0" means the same of input
     rtmpStream.recorderSettings = [
       AVMediaType.audio: [
         AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -181,16 +181,16 @@ class MuxRtmpView: NSObject, FlutterPlatformView, RTMPStreamDelegate {
     rtmpConnection.connect(bits.joined(separator: "/"))
   }
 
-    func startStream(width: Int, height: Int) {
+  func startStream(width: Int, height: Int) {
     let uri = URL(string: broadcastUrl!)
     log("Starting stream")
-  rtmpStream.videoSettings = [
-    .width: width, // video output width
-    .height: height, // video output height
-    .bitrate: 1200 * 1000, // video output bitrate
-    .profileLevel: kVTProfileLevel_H264_Baseline_AutoLevel, // H264 Profile require "import VideoToolbox"
-    .maxKeyFrameIntervalDuration: 2, // key frame / sec
-  ]
+    rtmpStream.videoSettings = [
+      .width: width, // video output width
+      .height: height, // video output height
+      .bitrate: 1200 * 1000, // video output bitrate
+      .profileLevel: kVTProfileLevel_H264_Baseline_AutoLevel, // H264 Profile require "import VideoToolbox"
+      .maxKeyFrameIntervalDuration: 2, // key frame / sec
+    ]
     rtmpStream.publish(uri?.pathComponents.last)
   }
 

@@ -30,7 +30,7 @@ class MuxRtmpController {
   void attachToChannel(MethodChannel channel) {
     _channel = channel;
     _channel?.setMethodCallHandler(_handle);
-    _channel?.invokeMethod('configure', {'broadcastUrl': url});
+    configure();
   }
 
   Future<dynamic> _handle(MethodCall call) {
@@ -46,6 +46,10 @@ class MuxRtmpController {
       default:
         return Future<dynamic>.value(null);
     }
+  }
+
+  Future<void> configure() async {
+    await _channel?.invokeMethod('configure', {'broadcastUrl': url});
   }
 
   Future<void> startStream({double width = 480, double height = 640}) async {
